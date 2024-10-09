@@ -1,3 +1,7 @@
+Fork of obs-backgroundremoval with support for adding a background behind person
+
+person / bg-image / original background
+
 # OBS Plugin: Portrait Background Removal / Virtual Green-screen and Low-Light Enhancement
 
 <div align="center">

@@ -307,41 +307,41 @@ obs_properties_t *background_filter_properties(void *data)
 		props, "image_similarity_threshold",
 		obs_module_text("ImageSimilarityThreshold"), 0.0, 100.0, 1.0);
 
-	/* Background Blur Props */
-	obs_properties_add_int_slider(
-		props, "blur_background",
-		obs_module_text("BlurBackgroundFactor0NoBlurUseColor"), 0, 20,
-		1);
+	// /* Background Blur Props */
+	// obs_properties_add_int_slider(
+	// 	props, "blur_background",
+	// 	obs_module_text("BlurBackgroundFactor0NoBlurUseColor"), 0, 20,
+	// 	1);
 
-	obs_property_t *p_enable_focal_blur = obs_properties_add_bool(
-		props, "enable_focal_blur", obs_module_text("EnableFocalBlur"));
-	obs_property_set_modified_callback(p_enable_focal_blur,
-					   enable_focal_blur);
+	// obs_property_t *p_enable_focal_blur = obs_properties_add_bool(
+	// 	props, "enable_focal_blur", obs_module_text("EnableFocalBlur"));
+	// obs_property_set_modified_callback(p_enable_focal_blur,
+	// 				   enable_focal_blur);
 
-	obs_properties_t *focal_blur_props = obs_properties_create();
+	// obs_properties_t *focal_blur_props = obs_properties_create();
 
-	obs_properties_add_float_slider(focal_blur_props, "blur_focus_point",
-					obs_module_text("BlurFocusPoint"), 0.0,
-					1.0, 0.05);
-	obs_properties_add_float_slider(focal_blur_props, "blur_focus_depth",
-					obs_module_text("BlurFocusDepth"), 0.0,
-					0.3, 0.02);
+	// obs_properties_add_float_slider(focal_blur_props, "blur_focus_point",
+	// 				obs_module_text("BlurFocusPoint"), 0.0,
+	// 				1.0, 0.05);
+	// obs_properties_add_float_slider(focal_blur_props, "blur_focus_depth",
+	// 				obs_module_text("BlurFocusDepth"), 0.0,
+	// 				0.3, 0.02);
 
-	obs_properties_add_group(props, "focal_blur_group",
-				 obs_module_text("FocalBlurGroup"),
-				 OBS_GROUP_NORMAL, focal_blur_props);
+	// obs_properties_add_group(props, "focal_blur_group",
+	// 			 obs_module_text("FocalBlurGroup"),
+	// 			 OBS_GROUP_NORMAL, focal_blur_props);
 
 	// Add a informative text about the plugin
 	// replace the placeholder with the current version
 	// use std::regex_replace instead of QString::arg because the latter doesn't work on Linux
 	std::string basic_info = std::regex_replace(
 		PLUGIN_INFO_TEMPLATE, std::regex("%1"), PLUGIN_VERSION);
-	// Check for update
-	if (get_latest_version() != nullptr) {
-		basic_info += std::regex_replace(
-			PLUGIN_INFO_TEMPLATE_UPDATE_AVAILABLE, std::regex("%1"),
-			get_latest_version());
-	}
+	// // Check for update
+	// if (get_latest_version() != nullptr) {
+	// 	basic_info += std::regex_replace(
+	// 		PLUGIN_INFO_TEMPLATE_UPDATE_AVAILABLE, std::regex("%1"),
+	// 		get_latest_version());
+	// }
 	obs_properties_add_text(props, "info", basic_info.c_str(),
 				OBS_TEXT_INFO);
 
@@ -408,14 +408,14 @@ void background_filter_update(void *data, obs_data_t *settings)
 	tf->maskEveryXFrames =
 		(int)obs_data_get_int(settings, "mask_every_x_frames");
 	tf->maskEveryXFramesCount = (int)(0);
-	tf->blurBackground = obs_data_get_int(settings, "blur_background");
-	tf->blurBackground = obs_data_get_int(settings, "blur_background");
-	tf->enableFocalBlur =
-		(bool)obs_data_get_bool(settings, "enable_focal_blur");
-	tf->blurFocusPoint =
-		(float)obs_data_get_double(settings, "blur_focus_point");
-	tf->blurFocusDepth =
-		(float)obs_data_get_double(settings, "blur_focus_depth");
+	// tf->blurBackground = obs_data_get_int(settings, "blur_background");
+	// tf->blurBackground = obs_data_get_int(settings, "blur_background");
+	// tf->enableFocalBlur =
+	// 	(bool)obs_data_get_bool(settings, "enable_focal_blur");
+	// tf->blurFocusPoint =
+	// 	(float)obs_data_get_double(settings, "blur_focus_point");
+	// tf->blurFocusDepth =
+	// 	(float)obs_data_get_double(settings, "blur_focus_depth");
 	tf->temporalSmoothFactor =
 		(float)obs_data_get_double(settings, "temporal_smooth_factor");
 	tf->imageSimilarityThreshold = (float)obs_data_get_double(

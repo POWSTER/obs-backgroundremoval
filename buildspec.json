@@ -36,12 +36,12 @@
             "bundleId": "com.royshilkrot.obs-backgroundremoval"
         }
     },
-    "name": "obs-backgroundremoval",
-    "displayName": "OBS Background Removal",
+    "name": "background-segmentation",
+    "displayName": "Background Segmentation",
     "version": "1.2.0",
-    "author": "Roy Shilkrot",
-    "website": "https://github.com/royshil/obs-backgroundremoval",
-    "email": "roy.shil@gmail.com",
+    "author": "POWSTER",
+    "website": "https://github.com/POWSTER/obs-backgroundremoval",
+    "email": "ben@powster.com",
     "uuids": {
         "macosPackage": "c6b4a038-f7da-490a-b8ba-a31e29e337c9",
         "macosInstaller": "368f7535-4e71-4587-952b-33ad935bf9f3",
