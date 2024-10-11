@@ -115,6 +115,26 @@ static void create_media_source(struct background_removal_filter *tf)
     }
 }
 
+// handle the enable/disable event
+static void background_filter_enable_changed(void *data, calldata_t *calldata)
+{
+    struct background_removal_filter *tf = reinterpret_cast<background_removal_filter *>(data);
+    bool enabled = calldata_bool(calldata, "enabled");
+	obs_log(LOG_INFO, "Background filter enable changed: %d", enabled);
+	obs_log(LOG_INFO, "Background filter isVideo: %d", tf->isVideo);
+	obs_log(LOG_INFO, "Background media source: %p", (void*)tf->mediaSource);
+
+	if (!enabled) {
+		tf->isDisabled = true;
+	}
+	// && tf->mediaSource && tf->isVideo
+	// If video is enabled and we have a media source, restart the video
+    if (enabled) {
+		tf->isDisabled = false;
+    }
+}
+
+
 
 /********************** */
 
@@ -588,6 +608,10 @@ void *background_filter_create(obs_data_t *settings, obs_source_t *source)
 	tf->modelSelection = MODEL_MEDIAPIPE;
 	background_filter_update(tf, settings);
 
+	// Connect the enable signal handler
+    signal_handler_t *handler = obs_source_get_signal_handler(source);
+    signal_handler_connect(handler, "enable", background_filter_enable_changed, tf);
+
 	
 
 	return tf;
@@ -602,6 +626,10 @@ void background_filter_destroy(void *data)
 
 	if (tf) {
 		tf->isDisabled = true;
+
+		// Disconnect the signal handler
+        signal_handler_t *handler = obs_source_get_signal_handler(tf->source);
+        signal_handler_disconnect(handler, "enable", background_filter_enable_changed, tf);
 
 		obs_enter_graphics();
 		gs_texrender_destroy(tf->texrender);
@@ -913,8 +941,8 @@ static uint32_t next_power_of_two(uint32_t v)
 //TODO: Improve this logic, atm it just makes it go into a small window
 gs_texture_t* create_texture_with_fallback(uint32_t img_width, uint32_t img_height, uint32_t texture_width, uint32_t texture_height, enum gs_color_format format, uint32_t levels, const uint8_t **data, uint32_t flags)
 {
-    obs_log(LOG_INFO, "Attempting to create texture: Image(%dx%d), Desired(%dx%d), format: %d", 
-            img_width, img_height, texture_width, texture_height, format);
+    // obs_log(LOG_INFO, "Attempting to create texture: Image(%dx%d), Desired(%dx%d), format: %d", 
+    //         img_width, img_height, texture_width, texture_height, format);
 
     gs_texture_t* texture = nullptr;
 
@@ -922,7 +950,7 @@ gs_texture_t* create_texture_with_fallback(uint32_t img_width, uint32_t img_heig
     try {
         texture = gs_texture_create(texture_width, texture_height, format, levels, nullptr, flags);
         if (texture) {
-            obs_log(LOG_INFO, "Texture created successfully with desired dimensions");
+            // obs_log(LOG_INFO, "Texture created successfully with desired dimensions");
             // Resize the image data to fit the new texture
             gs_copy_texture_region(
                 texture, 0, 0,
@@ -939,7 +967,7 @@ gs_texture_t* create_texture_with_fallback(uint32_t img_width, uint32_t img_heig
     try {
         texture = gs_texture_create(img_width, img_height, format, levels, data, flags);
         if (texture) {
-            obs_log(LOG_INFO, "Texture created successfully with original image dimensions");
+            // obs_log(LOG_INFO, "Texture created successfully with original image dimensions");
             return texture;
         }
     } catch (const std::exception& e) {
@@ -966,8 +994,8 @@ gs_texture_t* create_texture_with_fallback(uint32_t img_width, uint32_t img_heig
         try {
             texture = gs_texture_create(fallback_widths[i], fallback_heights[i], format, levels, nullptr, flags);
             if (texture) {
-                obs_log(LOG_INFO, "Texture created successfully with fallback dimensions: %dx%d", 
-                        fallback_widths[i], fallback_heights[i]);
+                // obs_log(LOG_INFO, "Texture created successfully with fallback dimensions: %dx%d", 
+                //         fallback_widths[i], fallback_heights[i]);
                 // Resize the image data to fit the new texture
                 gs_copy_texture_region(
                     texture, 0, 0,
@@ -1069,20 +1097,20 @@ static gs_texture_t *get_bg_img(struct background_removal_filter *tf,
 
 static gs_texture_t *get_bg_texture(struct background_removal_filter *tf, uint32_t width, uint32_t height)
 {
-    obs_log(LOG_INFO, "Entering get_bg_texture. isVideo: %d, mediaSource: %p", tf->isVideo, (void*)tf->mediaSource);
+    // obs_log(LOG_INFO, "Entering get_bg_texture. isVideo: %d, mediaSource: %p", tf->isVideo, (void*)tf->mediaSource);
 
     if (tf->isVideo && tf->mediaSource) {
-        obs_log(LOG_INFO, "Processing video source");
+        // obs_log(LOG_INFO, "Processing video source");
 
         if (!tf->videoTexrender) {
             tf->videoTexrender = gs_texrender_create(GS_RGBA, GS_ZS_NONE);
-            obs_log(LOG_INFO, "Created new videoTexrender: %p", (void*)tf->videoTexrender);
+            // obs_log(LOG_INFO, "Created new videoTexrender: %p", (void*)tf->videoTexrender);
         }
 
         uint32_t source_cx = obs_source_get_width(tf->mediaSource);
         uint32_t source_cy = obs_source_get_height(tf->mediaSource);
 
-        obs_log(LOG_INFO, "Source dimensions: %ux%u", source_cx, source_cy);
+        // obs_log(LOG_INFO, "Source dimensions: %ux%u", source_cx, source_cy);
 
         if (source_cx == 0 || source_cy == 0) {
             obs_log(LOG_ERROR, "Invalid source dimensions");
@@ -1090,9 +1118,9 @@ static gs_texture_t *get_bg_texture(struct background_removal_filter *tf, uint32
         }
 
         gs_texrender_reset(tf->videoTexrender);
-        obs_log(LOG_INFO, "Attempting to begin texrender");
+        // obs_log(LOG_INFO, "Attempting to begin texrender");
         if (gs_texrender_begin(tf->videoTexrender, source_cx, source_cy)) {
-            obs_log(LOG_INFO, "Texrender begin successful");
+            // obs_log(LOG_INFO, "Texrender begin successful");
 
             struct vec4 background;
             vec4_zero(&background);
@@ -1108,13 +1136,13 @@ static gs_texture_t *get_bg_texture(struct background_removal_filter *tf, uint32
             gs_blend_state_pop();
             gs_texrender_end(tf->videoTexrender);
 
-            obs_log(LOG_INFO, "Video rendered successfully");
+            // obs_log(LOG_INFO, "Video rendered successfully");
             return gs_texrender_get_texture(tf->videoTexrender);
         } else {
             obs_log(LOG_ERROR, "Failed to begin texrender");
         }
     } else if (!tf->isVideo) {
-        obs_log(LOG_INFO, "Processing static image");
+        // obs_log(LOG_INFO, "Processing static image");
         return get_bg_img(tf, width, height);
     }
 
@@ -1173,6 +1201,16 @@ void background_filter_video_render(void *data, gs_effect_t *_effect)
         bgTexture = get_bg_texture(tf, width, height);
     }
 
+	if (!bgTexture) {
+		// No background texture, skip rendering
+		if (tf->source) {
+			obs_source_skip_video_filter(tf->source);
+		}
+		gs_texture_destroy(alphaTexture);
+		return;
+	}
+
+
 	// Output the masked image
 	gs_texture_t *blurredTexture =
 		blur_background(tf, width, height, alphaTexture);
@@ -1219,13 +1257,9 @@ void background_filter_video_render(void *data, gs_effect_t *_effect)
 	const char *techName;
 	if (bgTexture) {
 		techName = "DrawWithBGImage";
-	} else if (tf->blurBackground > 0) {
-		if (tf->enableFocalBlur)
-			techName = "DrawWithFocalBlur";
-		else
-			techName = "DrawWithBlur";
 	} else {
-		techName = "DrawWithoutBlur";
+		//Skip this frame
+		obs_source_skip_video_filter(tf->source);
 	}
 
 	obs_source_process_filter_tech_end(tf->source, tf->effect, 0, 0,
