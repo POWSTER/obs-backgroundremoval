@@ -127,8 +127,6 @@ static void background_filter_enable_changed(void *data, calldata_t *calldata)
 	if (!enabled) {
 		tf->isDisabled = true;
 	}
-	// && tf->mediaSource && tf->isVideo
-	// If video is enabled and we have a media source, restart the video
     if (enabled) {
 		tf->isDisabled = false;
     }
